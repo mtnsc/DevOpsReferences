@@ -1,0 +1,13 @@
+# Ubuntu VM in bridge mode
+Vagrant.configure "2" do |config|
+    config.vm.define "ubuntu-vm" do |config|
+        config.vm.box = "ubuntu/jammy64"
+        config.vm.hostname = "vm"
+        #config.vm.disk :disk, size: "40GB", name: "Drive" # Optional: Extra disk
+        config.vm.provider :virtualbox do |machine| # Optional: Replace :virtualbox with :libvirt
+            machine.memory = 2048
+            machine.cpus = 2
+        end
+    end
+    config.vm.network "public_network", bridge: "eth0" # Replace "eth0" with your network interface (run "get_bridge.sh" to get it)
+end
