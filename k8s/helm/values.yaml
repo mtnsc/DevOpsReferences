@@ -1,0 +1,9 @@
+name: nginx
+replicas: 2
+content: Hello world!
+deployment:
+  name: nginx
+  version: nginx:alpine
+service:
+  name: nginx
+  port: 80

@@ -1,0 +1,66 @@
+---
+apiVersion: v1
+data:
+  nginx.conf: |
+    user nginx;
+    events {
+        worker_connections  128;
+    }
+    http {
+        upstream balancer {
+            server web-server1.default.svc.cluster.local:8000;
+            server web-server2.default.svc.cluster.local:8000;
+            server web-server3.default.svc.cluster.local:8000;
+        }
+        server {
+            listen 80;
+            location / {
+                proxy_pass http://balancer;
+            }
+        }
+    }
+kind: ConfigMap
+metadata:
+  name: nginx-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx:alpine
+        name: nginx
+        volumeMounts:
+        - mountPath: /etc/nginx/
+          name: nginx-volume
+      volumes:
+      - name: nginx-volume
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  type: NodePort

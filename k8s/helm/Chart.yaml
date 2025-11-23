@@ -1,0 +1,6 @@
+apiVersion: v3
+name: nginx-example
+description: Example of a full nginx deploy, with a custom page, deployment and service attached.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
