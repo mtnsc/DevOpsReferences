@@ -1,0 +1,15 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sCapabilities
+metadata:
+  name: pod-must-set-capabilities
+  namespace: "gatekeeper-system"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-*", "gatekeeper-*"]
+  parameters:
+    allowedCapabilities: ["NET_BIND_SERVICE", "CHOWN", "SETUID", "SETGID"]
+    requiredDropCapabilities: ["ALL"]

@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDeniedImageTags
+metadata:
+  name: pod-must-not-use-latest
+  namespace: "gatekeeper-system"
+spec:
+  enforcementAction: warn
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-*", "gatekeeper-*"]
+  parameters:
+    deniedTags: ["latest", "main", "alpine"]

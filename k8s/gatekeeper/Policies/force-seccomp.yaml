@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sSeccomp
+metadata:
+  name: pod-must-use-runtimeprofile
+  namespace: "gatekeeper-system"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-*", "gatekeeper-*"]
+  parameters:
+    allowedProfiles: ["RuntimeDefault"]

@@ -1,0 +1,14 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sAllowedRepos
+metadata:
+  name: pod-must-use-docker
+  namespace: "gatekeeper-system"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-*", "gatekeeper-*"]
+  parameters:
+    repos: ["docker.io/"]

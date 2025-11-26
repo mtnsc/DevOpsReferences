@@ -1,0 +1,15 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sContainerLimits
+metadata:
+  name: pod-must-set-limit
+  namespace: "gatekeeper-system"
+spec:
+  enforcementAction: warn
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-*", "gatekeeper-*"]
+  parameters:
+    cpu: "250m"
+    memory: "500m"

@@ -1,0 +1,15 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sAllowedUsers
+metadata:
+  name: pod-must-not-execute-as-root
+  namespace: "gatekeeper-system"
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    excludedNamespaces: ["kube-*", "gatekeeper-*"]
+  parameters:
+      runAsUser:
+        rule: "MustRunAsNonRoot"
