@@ -1,0 +1,4 @@
+repo_name:
+  url: "https://github.com/$USERNAME/$REPO_NAME"
+  username: "Username"
+  password_file: /secrets/git_ssh_key

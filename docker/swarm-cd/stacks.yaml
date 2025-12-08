@@ -1,0 +1,4 @@
+stack_name:
+  repo: repo_name
+  branch: main
+  compose_file: docker-compose.yaml
