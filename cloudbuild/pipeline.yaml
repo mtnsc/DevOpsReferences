@@ -1,0 +1,72 @@
+steps:
+- name: "gcr.io/cloud-builders/git"
+  id: setup
+  entrypoint: "bash"
+  args:
+    - -c
+    - |
+      set -euo pipefail
+
+      echo "$$GIT_SSH_KEY" | base64 -d > /workspace/id_ssh
+      chmod 400 /workspace/id_ssh
+      eval "$(ssh-agent -s)"
+      ssh-add /workspace/id_ssh
+      ssh-keyscan $$REPO_HOST >> /workspace/known_hosts
+      git clone -b "$$BRANCH_NAME" git@$$REPO_HOST:$$REPO_USER/$$REPO_NAME.git
+  env:
+    - 'GIT_SSH_COMMAND=ssh -i /workspace/id_ssh -o UserKnownHostsFile=/workspace/known_hosts -o IdentitiesOnly=yes'
+  secretEnv:
+    - GIT_SSH_KEY
+
+- name: "docker.io/gcc"
+  id: compile
+  entrypoint: "bash"
+  dir: /workspace/$$REPO_NAME
+  args:
+    - -c
+    - |
+      set -euo pipefail
+
+      make release
+  waitFor:
+    - setup
+
+- name: "gcr.io/cloud-builders/docker"
+  id: build
+  entrypoint: "bash"
+  dir: /workspace/$$REPO_NAME
+  args: 
+    - -c
+    - |
+      set -euo pipefail
+      
+      echo "$$DOCKER_ACCESS_FILE" | base64 -d > /workspace/config.json
+        
+      docker build -f Dockerfile -t "$$REPO_USER/$$REPO_NAME" .
+  secretEnv:
+    - DOCKER_ACCESS_FILE
+  waitFor:
+    - compile
+
+- name: "gcr.io/cloud-builders/docker"
+  id: push
+  entrypoint: "bash"
+  dir: /workspace/$$REPO_NAME
+  args:
+    - -c
+    - |
+      set -euo pipefail
+      
+      docker tag "$$REPO_USER/$$REPO_NAME:latest" "$$REPO_USER/$$REPO_NAME:$$NEW_VERSION"
+      docker push "$$REPO_USER/$$REPO_NAME:$$NEW_VERSION"
+  waitFor:
+    - build
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+availableSecrets:
+  secretManager:
+    - versionName: projects/.../secrets/GIT_SSH_KEY/versions/latest
+      env: GIT_SSH_KEY
+    - versionName: projects/.../secrets/DOCKER_ACCESS_FILE/versions/latest
+      env: DOCKER_ACCESS_FILE
